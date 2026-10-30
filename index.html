@@ -349,8 +349,22 @@ function oliveCloseCard(){let node=document.getElementById('olive-focus-shade');
 function oliveDrawCard(){oliveCloseCard();let id=oliveCardIdSaved||null}
 let oliveCardIdSaved=null;
 function oliveShow(id,view='real'){const linked=OLIVE_SYMBOL_TO_LIBRARY[id];if(linked){olivePhotoFocus(linked,view);return;}oliveCardIdSaved=id;oliveCardView=view;olivePresent()}
-function olivePresent(){const it=OLIVE_VISUALS[oliveCardIdSaved];const sym=symbolMap[oliveCardIdSaved];if(!it&&!sym)return;const name=it?it.name:sym[0],description=it?it.description:sym[2];let shade=document.getElementById('olive-focus-shade');if(!shade){shade=document.createElement('div');shade.id='olive-focus-shade';shade.className='olive-focus-shade';document.body.append(shade)}
-const hasSymbol=!!sym,hasPhoto=!!(it&&it.photo&&OLIVE_PHOTOS[it.photo]),hasG3Diagram=!!(it&&['inlet','tprv','tundish','pipe'].includes(oliveCardIdSaved));if(oliveCardView==='symbol'&&!hasSymbol&&!hasG3Diagram)oliveCardView='real';shade.innerHTML=`<section class="olive-focus" role="dialog" aria-modal="true" aria-label="${h(name)}"><div class="row"><div><span class="eyebrow">OLIVE · COMPONENT REFERENCE</span><h2 style="margin-top:6px">${h(name)}</h2></div><button class="btn secondary" style="padding:8px 12px" onclick="oliveDismiss()" aria-label="Close card">✕</button></div><div class="olive-focus-switch">${hasPhoto&&oliveCardView!=='real'?`<button onclick="oliveCardView='real';olivePresent()">View real component →</button>`:''}${(hasSymbol||hasG3Diagram)&&oliveCardView!=='symbol'?`<button onclick="oliveCardView='symbol';olivePresent()">${hasSymbol?'View schematic symbol':'View G3 system diagram'} →</button>`:''}</div><div class="olive-focus-media">${oliveCardView==='symbol'&&hasSymbol?symSVG(oliveCardIdSaved):oliveCardView==='symbol'&&hasG3Diagram?`<div style="overflow-x:auto;width:100%">${g3Svg()}</div>`:hasPhoto?olivePhoto(it.photo):hasSymbol?symSVG(oliveCardIdSaved):''}</div><p>${h(description)}</p><p class="small">${hasPhoto?'Educational photorealistic-style reference, not a manufacturer product specification.':'Original revision symbol — check the drawing key on your actual exam.'}</p><button class="btn wide" onclick="oliveDismiss()">Back to revision</button></section>`;shade.onclick=(e)=>{if(e.target===shade)oliveDismiss()};shade.querySelector('button').focus({preventScroll:true})}
+function olivePresent(){
+ const it=OLIVE_VISUALS[oliveCardIdSaved],sym=symbolMap[oliveCardIdSaved];
+ if(!it&&!sym)return;
+ const name=it?it.name:sym[0],description=it?it.description:sym[2];
+ const hasSymbol=!!sym,hasPhoto=!!(it&&it.photo&&OLIVE_PHOTOS[it.photo]);
+ const hasNewG3=!!(it&&['inlet','tprv','tundish','pipe'].includes(oliveCardIdSaved));
+ if(oliveCardView==='symbol'&&!hasSymbol&&!hasNewG3)oliveCardView='real';
+ const image=oliveCardView==='symbol'&&hasSymbol?symSVG(oliveCardIdSaved):
+  oliveCardView==='symbol'&&hasNewG3?`<img style="display:block;width:100%;height:auto;object-fit:contain;border-radius:12px" src="${OLIVE_REAL_ASSETS['olive:system-unvented']}" alt="Photo-like unvented hot-water system illustration">`:
+  hasPhoto?olivePhoto(it.photo):hasSymbol?symSVG(oliveCardIdSaved):'';
+ let shade=document.getElementById('olive-focus-shade');
+ if(!shade){shade=document.createElement('div');shade.id='olive-focus-shade';shade.className='olive-focus-shade';document.body.append(shade)}
+ shade.innerHTML=`<section class="olive-focus" role="dialog" aria-modal="true" aria-label="${h(name)}"><div class="row"><div><span class="eyebrow">OLIVE · COMPONENT REFERENCE</span><h2 style="margin-top:6px">${h(name)}</h2></div><button class="btn secondary" style="padding:8px 12px" onclick="oliveDismiss()" aria-label="Close card">✕</button></div><div class="olive-focus-switch">${hasPhoto&&oliveCardView!=='real'?`<button onclick="oliveCardView='real';olivePresent()">View real component →</button>`:''}${(hasSymbol||hasNewG3)&&oliveCardView!=='symbol'?`<button onclick="oliveCardView='symbol';olivePresent()">${hasSymbol?'View schematic symbol':'View new G3 illustration'} →</button>`:''}</div><div class="olive-focus-media">${image}</div><p>${h(description)}</p><p class="small">${oliveCardView==='symbol'&&hasNewG3?'Conceptual study illustration; not an installation drawing.':'Educational component reference; verify manufacturer specifications where relevant.'}</p><button class="btn wide" onclick="oliveDismiss()">Back to revision</button></section>`;
+ shade.onclick=e=>{if(e.target===shade)oliveDismiss()};
+ shade.querySelector('button').focus({preventScroll:true});
+}
 function oliveDismiss(){document.getElementById('olive-focus-shade')?.remove();oliveCardIdSaved=null}
 function showSymbol(id){if(!symbolMap[id])return;const linked=OLIVE_SYMBOL_TO_LIBRARY[id];if(linked){olivePhotoFocus(linked,'symbol');return;}oliveShow(id,'symbol')}
 const OLIVE_SIGN_TYPES=['warning','mandatory','prohibition','safe'];
